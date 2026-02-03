@@ -13,6 +13,12 @@ export default defineConfig({
     server: {
         host: true,
         port: 5173,
-        allowedHosts: ['timely-droll-bug.cloudpub.ru']
+        allowedHosts: ['timely-droll-bug.cloudpub.ru'],
+        proxy: {
+            '/api': {
+                target: 'http://backend:8000',
+                changeOrigin: true,
+            },
+        },
     },
 })

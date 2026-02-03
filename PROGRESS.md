@@ -1,6 +1,6 @@
 # AdMarket — Progress Tracker
 
-## 📍 Текущий статус: TON Connect интеграция завершена
+## 📍 Текущий статус: Wallet Sync работает ✅
 
 ---
 
@@ -10,7 +10,7 @@
 - [x] `.env.example` с переменными окружения
 - [x] `backend/app/core/config.py` — pydantic-settings
 - [x] `backend/app/models.py` — SQLAlchemy 2.0 Async
-  - User (telegram_id, language_code, role)
+  - User (telegram_id, language_code, role, **wallet_address**)
   - Channel (verified_stats JSONB)
   - Deal (status enum, smart_contract_address)
 - [x] `.gitignore` для защиты секретов
@@ -31,7 +31,7 @@
 ## Этап 3: Mini App (Frontend) ✅
 - [x] Инициализация Vite + React + TypeScript
   - `frontend/package.json` с зависимостями
-  - `frontend/vite.config.ts` (alias @)
+  - `frontend/vite.config.ts` (alias @, proxy /api)
   - `frontend/tsconfig.json`
 - [x] Telegram WebApp SDK интеграция
   - `@twa-dev/sdk` в зависимостях
@@ -50,7 +50,21 @@
   - `TonConnectButton` в App.tsx
   - Отображение адреса кошелька с копированием
   - `public/tonconnect-manifest.json`
+- [x] **Wallet Sync с бэкендом**
+  - `useTonWallet()` hook для отслеживания подключения
+  - POST `/api/users/wallet` при подключении кошелька
+  - Статус-индикатор (syncing, success, error)
 - [ ] Компоненты UI (каталог каналов, карточка канала)
+
+---
+
+## Этап 3.5: API Layer ✅ (NEW)
+- [x] `backend/app/api/__init__.py` — пакет API
+- [x] `backend/app/api/deps.py` — Telegram initData HMAC-SHA256 валидация
+- [x] `backend/app/api/users.py` — POST /wallet эндпоинт
+- [x] CORS middleware в main.py
+- [x] Vite proxy `/api` → `backend:8000`
+- [x] Auto-create tables on startup (`Base.metadata.create_all`)
 
 ---
 
@@ -66,3 +80,5 @@
 3. `feat: add React frontend with Vite, TailwindCSS and Telegram WebApp SDK`
 4. `feat: add WebApp button with inline keyboard to /start command`
 5. `chore: configure Vite allowedHosts for CloudPub tunnel`
+6. `feat: add TON Connect wallet integration`
+7. `feat: add wallet sync API with initData validation` ← **NEW**
