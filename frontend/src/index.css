@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Root styles with Telegram theme integration */
+:root {
+  --tg-viewport-height: 100vh;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--tg-theme-bg-color, #ffffff);
+  color: var(--tg-theme-text-color, #000000);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100%;
+  min-height: var(--tg-viewport-height);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Telegram-style button */
+.tg-button {
+  @apply px-6 py-3 rounded-xl font-semibold text-base transition-all duration-200;
+  background-color: var(--tg-theme-button-color, #2481cc);
+  color: var(--tg-theme-button-text-color, #ffffff);
+}
+
+.tg-button:active {
+  transform: scale(0.98);
+  opacity: 0.9;
+}
+
+/* Glass effect for cards */
+.glass-card {
+  @apply rounded-2xl p-4;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}

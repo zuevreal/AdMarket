@@ -1,6 +1,6 @@
 # AdMarket — Progress Tracker
 
-## 📍 Текущий статус: Этап 2 завершён
+## 📍 Текущий статус: Этап 3 завершён
 
 ---
 
@@ -27,9 +27,21 @@
 
 ---
 
-## Этап 3: Mini App (Frontend) 🔜
-- [ ] Инициализация Vite + React + TypeScript
-- [ ] Telegram WebApp SDK интеграция
+## Этап 3: Mini App (Frontend) ✅
+- [x] Инициализация Vite + React + TypeScript
+  - `frontend/package.json` с зависимостями
+  - `frontend/vite.config.ts` (alias @)
+  - `frontend/tsconfig.json`
+- [x] Telegram WebApp SDK интеграция
+  - `@twa-dev/sdk` в зависимостях
+  - `WebApp.ready()` + `WebApp.expand()` в App.tsx
+- [x] TailwindCSS с Telegram CSS переменными
+  - `tailwind.config.js` (tg-bg, tg-text, tg-button)
+  - `index.css` с glass-card и tg-button классами
+- [x] UI компоненты (loading state, info cards)
+- [x] Docker интеграция
+  - `frontend/Dockerfile` (node:20-alpine)
+  - Сервис `frontend` в docker-compose.yml
 - [ ] Компоненты UI (каталог каналов, карточка канала)
 - [ ] TON Connect интеграция
 
@@ -43,3 +55,4 @@
 
 ## Коммиты
 1. `feat: scaffold backend with FastAPI, Docker, and SQLAlchemy models`
+2. `feat: add Telegram bot with aiogram, /start handler and i18n`
