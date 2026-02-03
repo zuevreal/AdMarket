@@ -43,6 +43,7 @@
 - [x] Docker интеграция
   - `frontend/Dockerfile` (node:20-alpine)
   - Сервис `frontend` в docker-compose.yml
+- [x] CloudPub tunnel (allowedHosts в vite.config.ts)
 - [ ] Компоненты UI (каталог каналов, карточка канала)
 - [ ] TON Connect интеграция
 
@@ -58,3 +59,4 @@
 1. `feat: scaffold backend with FastAPI, Docker, and SQLAlchemy models`
 2. `feat: add Telegram bot with aiogram, /start handler and i18n`
 3. `feat: add React frontend with Vite, TailwindCSS and Telegram WebApp SDK`
+4. `feat: add WebApp button with inline keyboard to /start command`
