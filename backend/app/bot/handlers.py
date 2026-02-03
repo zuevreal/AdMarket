@@ -9,15 +9,16 @@ from typing import Any
 
 from aiogram import Router
 from aiogram.filters import CommandStart
-from aiogram.types import Message
-from sqlalchemy import select
+from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
 from sqlalchemy.dialects.postgresql import insert
 
+from app.core.config import get_settings
 from app.core.database import get_db
 from app.models import User
 
 logger = logging.getLogger(__name__)
 router = Router(name="main")
+settings = get_settings()
 
 # Locales directory
 LOCALES_DIR = Path(__file__).parent.parent / "locales"
@@ -49,11 +50,33 @@ def get_text(key: str, lang: str = "en") -> str:
     return key
 
 
+def get_webapp_keyboard() -> InlineKeyboardMarkup | None:
+    """
+    Create inline keyboard with WebApp button.
+    Returns None if WEBAPP_URL is not configured.
+    """
+    if not settings.WEBAPP_URL:
+        logger.warning("WEBAPP_URL not configured, skipping WebApp button")
+        return None
+    
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text="🚀 Open App",
+                    web_app=WebAppInfo(url=settings.WEBAPP_URL),
+                )
+            ]
+        ]
+    )
+    return keyboard
+
+
 @router.message(CommandStart())
 async def cmd_start(message: Message) -> None:
     """
     Handle /start command.
-    Creates or updates user in database.
+    Creates or updates user in database and shows WebApp button.
     """
     if not message.from_user:
         return
@@ -91,6 +114,8 @@ async def cmd_start(message: Message) -> None:
         logger.error(f"Failed to upsert user {user.id}: {e}")
         # Don't fail the handler - still send welcome message
     
-    # Send welcome message
+    # Send welcome message with WebApp button
     welcome_text = get_text("start_message", lang)
-    await message.answer(welcome_text)
+    keyboard = get_webapp_keyboard()
+    
+    await message.answer(welcome_text, reply_markup=keyboard)

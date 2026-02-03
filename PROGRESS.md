@@ -1,6 +1,6 @@
 # AdMarket — Progress Tracker
 
-## 📍 Текущий статус: Этап 3 завершён
+## 📍 Текущий статус: Этап 3 завершён + WebApp интеграция
 
 ---
 
@@ -24,6 +24,7 @@
 - [x] `backend/app/bot/handlers.py` — /start с upsert в БД
 - [x] `backend/app/locales/{en,ru}.json` — i18n
 - [x] `backend/app/main.py` — lifespan + polling интеграция
+- [x] WebApp кнопка в /start (InlineKeyboardButton + WebAppInfo)
 
 ---
 
@@ -56,3 +57,4 @@
 ## Коммиты
 1. `feat: scaffold backend with FastAPI, Docker, and SQLAlchemy models`
 2. `feat: add Telegram bot with aiogram, /start handler and i18n`
+3. `feat: add React frontend with Vite, TailwindCSS and Telegram WebApp SDK`

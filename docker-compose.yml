@@ -35,6 +35,7 @@ services:
       - SECRET_KEY=${SECRET_KEY}
       - BOT_TOKEN=${BOT_TOKEN}
       - TON_NETWORK=${TON_NETWORK}
+      - WEBAPP_URL=${WEBAPP_URL}
     volumes:
       - ./backend/app:/app/app:ro
     depends_on:

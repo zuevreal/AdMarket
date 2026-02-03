@@ -34,6 +34,7 @@ class Settings(BaseSettings):
 
     # Telegram Bot
     BOT_TOKEN: str = ""
+    WEBAPP_URL: str = ""  # Mini App URL for WebAppInfo
 
     # TON Blockchain
     TON_NETWORK: Literal["mainnet", "testnet"] = "testnet"
