@@ -1,6 +1,6 @@
 # AdMarket — Progress Tracker
 
-## 📍 Текущий статус: Этап 3 завершён + WebApp интеграция
+## 📍 Текущий статус: TON Connect интеграция завершена
 
 ---
 
@@ -44,8 +44,13 @@
   - `frontend/Dockerfile` (node:20-alpine)
   - Сервис `frontend` в docker-compose.yml
 - [x] CloudPub tunnel (allowedHosts в vite.config.ts)
+- [x] TON Connect интеграция
+  - `@tonconnect/ui-react` в зависимостях
+  - `TonConnectUIProvider` в main.tsx
+  - `TonConnectButton` в App.tsx
+  - Отображение адреса кошелька с копированием
+  - `public/tonconnect-manifest.json`
 - [ ] Компоненты UI (каталог каналов, карточка канала)
-- [ ] TON Connect интеграция
 
 ---
 
@@ -60,3 +65,4 @@
 2. `feat: add Telegram bot with aiogram, /start handler and i18n`
 3. `feat: add React frontend with Vite, TailwindCSS and Telegram WebApp SDK`
 4. `feat: add WebApp button with inline keyboard to /start command`
+5. `chore: configure Vite allowedHosts for CloudPub tunnel`
