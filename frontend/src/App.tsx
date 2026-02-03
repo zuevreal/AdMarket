@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import { Megaphone, Loader2, Wallet, Copy, Check, AlertCircle } from 'lucide-react'
 import { TonConnectButton, useTonConnectUI, useTonWallet } from '@tonconnect/ui-react'
@@ -9,6 +10,7 @@ import axios from 'axios'
 const API_BASE = '/api'
 
 function App() {
+    const { t } = useTranslation()
     const [isLoading, setIsLoading] = useState(true)
     const [copied, setCopied] = useState(false)
     const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'success' | 'error'>('idle')
@@ -105,6 +107,16 @@ function App() {
         }
     }
 
+    // Get sync status text
+    const getSyncStatusText = () => {
+        switch (syncStatus) {
+            case 'syncing': return t('wallet_syncing')
+            case 'success': return t('wallet_synced')
+            case 'error': return t('wallet_sync_failed')
+            default: return t('wallet_connected')
+        }
+    }
+
     return (
         <div className="flex flex-col items-center justify-center min-h-screen p-6">
             {/* Logo and Title */}
@@ -119,11 +131,11 @@ function App() {
                 </div>
 
                 <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
-                    AdMarket
+                    {t('app_title')}
                 </h1>
 
                 <p className="text-tg-hint mt-2 text-center">
-                    Telegram Channel Advertising
+                    {t('app_subtitle')}
                 </p>
             </motion.div>
 
@@ -135,7 +147,7 @@ function App() {
                     className="flex flex-col items-center gap-3"
                 >
                     <Loader2 className="w-8 h-8 text-tg-link animate-spin" />
-                    <p className="text-tg-hint">Loading...</p>
+                    <p className="text-tg-hint">{t('loading')}</p>
                 </motion.div>
             ) : (
                 <motion.div
@@ -168,10 +180,7 @@ function App() {
                                     </div>
                                     <div>
                                         <p className="text-xs text-tg-hint">
-                                            {syncStatus === 'syncing' ? 'Syncing...' :
-                                                syncStatus === 'success' ? 'Synced ✓' :
-                                                    syncStatus === 'error' ? 'Sync failed' :
-                                                        'Connected Wallet'}
+                                            {getSyncStatusText()}
                                         </p>
                                         <p className="font-mono font-medium text-sm">{formatAddress(displayAddress)}</p>
                                     </div>
@@ -197,8 +206,8 @@ function App() {
                                 <span className="text-lg">📢</span>
                             </div>
                             <div>
-                                <p className="font-medium text-sm">Find Channels</p>
-                                <p className="text-xs text-tg-hint">Browse verified channels</p>
+                                <p className="font-medium text-sm">{t('find_channels')}</p>
+                                <p className="text-xs text-tg-hint">{t('find_channels_desc')}</p>
                             </div>
                         </div>
 
@@ -207,8 +216,8 @@ function App() {
                                 <span className="text-lg">💎</span>
                             </div>
                             <div>
-                                <p className="font-medium text-sm">Secure Payments</p>
-                                <p className="text-xs text-tg-hint">TON escrow protection</p>
+                                <p className="font-medium text-sm">{t('secure_payments')}</p>
+                                <p className="text-xs text-tg-hint">{t('secure_payments_desc')}</p>
                             </div>
                         </div>
                     </div>
@@ -222,7 +231,7 @@ function App() {
 
             {/* Version */}
             <p className="absolute bottom-4 text-xs text-tg-hint">
-                v0.2.1
+                v0.3.0
             </p>
         </div>
     )

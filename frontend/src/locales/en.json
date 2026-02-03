@@ -1,0 +1,13 @@
+{
+    "app_title": "AdMarket",
+    "app_subtitle": "Telegram Channel Advertising",
+    "loading": "Loading...",
+    "wallet_connected": "Connected Wallet",
+    "wallet_syncing": "Syncing...",
+    "wallet_synced": "Synced ✓",
+    "wallet_sync_failed": "Sync failed",
+    "find_channels": "Find Channels",
+    "find_channels_desc": "Browse verified channels",
+    "secure_payments": "Secure Payments",
+    "secure_payments_desc": "TON escrow protection"
+}

@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { TonConnectUIProvider } from '@tonconnect/ui-react'
 import App from './App'
+import './i18n' // Initialize i18n before app
 import './index.css'
 
 // TON Connect manifest URL - must be publicly accessible

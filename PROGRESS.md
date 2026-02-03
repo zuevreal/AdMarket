@@ -1,6 +1,6 @@
 # AdMarket — Progress Tracker
 
-## 📍 Текущий статус: Wallet Sync работает ✅
+## 📍 Текущий статус: Frontend i18n готов ✅
 
 ---
 
@@ -54,11 +54,16 @@
   - `useTonWallet()` hook для отслеживания подключения
   - POST `/api/users/wallet` при подключении кошелька
   - Статус-индикатор (syncing, success, error)
+- [x] **Frontend i18n (локализация)** ← **NEW**
+  - `i18next`, `react-i18next`, `i18next-browser-languagedetector`
+  - `src/i18n.ts` — Custom Telegram language detector
+  - `src/locales/en.json`, `src/locales/ru.json`
+  - `useTranslation()` hook в App.tsx
 - [ ] Компоненты UI (каталог каналов, карточка канала)
 
 ---
 
-## Этап 3.5: API Layer ✅ (NEW)
+## Этап 3.5: API Layer ✅
 - [x] `backend/app/api/__init__.py` — пакет API
 - [x] `backend/app/api/deps.py` — Telegram initData HMAC-SHA256 валидация
 - [x] `backend/app/api/users.py` — POST /wallet эндпоинт
@@ -81,4 +86,5 @@
 4. `feat: add WebApp button with inline keyboard to /start command`
 5. `chore: configure Vite allowedHosts for CloudPub tunnel`
 6. `feat: add TON Connect wallet integration`
-7. `feat: add wallet sync API with initData validation` ← **NEW**
+7. `feat: add wallet sync API with initData validation`
+8. `feat: add frontend i18n with Telegram language detection` ← **NEW**

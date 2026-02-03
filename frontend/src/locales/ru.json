@@ -1,0 +1,13 @@
+{
+    "app_title": "AdMarket",
+    "app_subtitle": "Реклама в Telegram-каналах",
+    "loading": "Загрузка...",
+    "wallet_connected": "Кошелёк подключён",
+    "wallet_syncing": "Синхронизация...",
+    "wallet_synced": "Синхронизировано ✓",
+    "wallet_sync_failed": "Ошибка синхронизации",
+    "find_channels": "Найти каналы",
+    "find_channels_desc": "Каталог проверенных каналов",
+    "secure_payments": "Безопасные платежи",
+    "secure_payments_desc": "Эскроу защита на TON"
+}
