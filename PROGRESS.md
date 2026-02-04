@@ -1,6 +1,6 @@
 # AdMarket — Progress Tracker
 
-## 📍 Текущий статус: Frontend i18n готов ✅
+## 📍 Текущий статус: Channel Management готов ✅
 
 ---
 
@@ -11,7 +11,7 @@
 - [x] `backend/app/core/config.py` — pydantic-settings
 - [x] `backend/app/models.py` — SQLAlchemy 2.0 Async
   - User (telegram_id, language_code, role, **wallet_address**)
-  - Channel (verified_stats JSONB)
+  - Channel (verified_stats JSONB, **price_per_post**)
   - Deal (status enum, smart_contract_address)
 - [x] `.gitignore` для защиты секретов
 
@@ -54,12 +54,16 @@
   - `useTonWallet()` hook для отслеживания подключения
   - POST `/api/users/wallet` при подключении кошелька
   - Статус-индикатор (syncing, success, error)
-- [x] **Frontend i18n (локализация)** ← **NEW**
+- [x] **Frontend i18n (локализация)**
   - `i18next`, `react-i18next`, `i18next-browser-languagedetector`
   - `src/i18n.ts` — Custom Telegram language detector
   - `src/locales/en.json`, `src/locales/ru.json`
   - `useTranslation()` hook в App.tsx
-- [ ] Компоненты UI (каталог каналов, карточка канала)
+- [x] **Channel Management UI** ← **NEW**
+  - `pages/MyChannels.tsx` — список каналов с удалением
+  - `components/AddChannelModal.tsx` — форма добавления
+  - Навигация Home ↔ My Channels в App.tsx
+  - Локализованные тексты (25+ ключей)
 
 ---
 
@@ -67,6 +71,10 @@
 - [x] `backend/app/api/__init__.py` — пакет API
 - [x] `backend/app/api/deps.py` — Telegram initData HMAC-SHA256 валидация
 - [x] `backend/app/api/users.py` — POST /wallet эндпоинт
+- [x] **`backend/app/api/channels.py`** ← **NEW**
+  - POST `/api/channels/` — добавить канал (с проверкой админа)
+  - GET `/api/channels/my` — мои каналы
+  - DELETE `/api/channels/{id}` — удалить канал
 - [x] CORS middleware в main.py
 - [x] Vite proxy `/api` → `backend:8000`
 - [x] Auto-create tables on startup (`Base.metadata.create_all`)
@@ -87,4 +95,5 @@
 5. `chore: configure Vite allowedHosts for CloudPub tunnel`
 6. `feat: add TON Connect wallet integration`
 7. `feat: add wallet sync API with initData validation`
-8. `feat: add frontend i18n with Telegram language detection` ← **NEW**
+8. `feat: add frontend i18n with Telegram language detection`
+9. `feat: add channel management with bot admin verification` ← **NEW**

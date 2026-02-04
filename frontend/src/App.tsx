@@ -1,20 +1,23 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
-import { Megaphone, Loader2, Wallet, Copy, Check, AlertCircle } from 'lucide-react'
-import { TonConnectButton, useTonConnectUI, useTonWallet } from '@tonconnect/ui-react'
+import { Megaphone, Loader2, Wallet, Copy, Check, AlertCircle, Radio, ChevronRight } from 'lucide-react'
+import { TonConnectButton, useTonWallet } from '@tonconnect/ui-react'
 import WebApp from '@twa-dev/sdk'
 import axios from 'axios'
+import MyChannels from './pages/MyChannels'
 
 // API base URL - always use backend through the same tunnel or relative in production
 const API_BASE = '/api'
+
+type Page = 'home' | 'my-channels'
 
 function App() {
     const { t } = useTranslation()
     const [isLoading, setIsLoading] = useState(true)
     const [copied, setCopied] = useState(false)
     const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'success' | 'error'>('idle')
-    const [tonConnectUI] = useTonConnectUI()
+    const [currentPage, setCurrentPage] = useState<Page>('home')
     const wallet = useTonWallet()
     const syncedAddressRef = useRef<string | null>(null)
 
@@ -117,6 +120,11 @@ function App() {
         }
     }
 
+    // Render My Channels page
+    if (currentPage === 'my-channels') {
+        return <MyChannels onBack={() => setCurrentPage('home')} />
+    }
+
     return (
         <div className="flex flex-col items-center justify-center min-h-screen p-6">
             {/* Logo and Title */}
@@ -166,9 +174,9 @@ function App() {
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
                                     <div className={`w-10 h-10 rounded-full flex items-center justify-center ${syncStatus === 'success' ? 'bg-green-500/20' :
-                                            syncStatus === 'error' ? 'bg-red-500/20' :
-                                                syncStatus === 'syncing' ? 'bg-blue-500/20' :
-                                                    'bg-green-500/20'
+                                        syncStatus === 'error' ? 'bg-red-500/20' :
+                                            syncStatus === 'syncing' ? 'bg-blue-500/20' :
+                                                'bg-green-500/20'
                                         }`}>
                                         {syncStatus === 'syncing' ? (
                                             <Loader2 className="w-5 h-5 text-blue-500 animate-spin" />
@@ -199,26 +207,45 @@ function App() {
                         </motion.div>
                     )}
 
-                    {/* Info Cards */}
+                    {/* Navigation Cards */}
                     <div className="w-full space-y-3">
-                        <div className="glass-card flex items-center gap-3">
+                        {/* My Channels */}
+                        <button
+                            onClick={() => setCurrentPage('my-channels')}
+                            className="w-full glass-card flex items-center gap-3 hover:bg-white/10 transition-colors text-left"
+                        >
+                            <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
+                                <Radio className="w-5 h-5 text-green-500" />
+                            </div>
+                            <div className="flex-1">
+                                <p className="font-medium text-sm">{t('my_channels')}</p>
+                                <p className="text-xs text-tg-hint">{t('my_channels_desc')}</p>
+                            </div>
+                            <ChevronRight className="w-5 h-5 text-tg-hint" />
+                        </button>
+
+                        {/* Find Channels */}
+                        <div className="glass-card flex items-center gap-3 opacity-60">
                             <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center">
                                 <span className="text-lg">📢</span>
                             </div>
-                            <div>
+                            <div className="flex-1">
                                 <p className="font-medium text-sm">{t('find_channels')}</p>
                                 <p className="text-xs text-tg-hint">{t('find_channels_desc')}</p>
                             </div>
+                            <span className="text-xs text-tg-hint">Soon</span>
                         </div>
 
-                        <div className="glass-card flex items-center gap-3">
+                        {/* Secure Payments */}
+                        <div className="glass-card flex items-center gap-3 opacity-60">
                             <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center">
                                 <span className="text-lg">💎</span>
                             </div>
-                            <div>
+                            <div className="flex-1">
                                 <p className="font-medium text-sm">{t('secure_payments')}</p>
                                 <p className="text-xs text-tg-hint">{t('secure_payments_desc')}</p>
                             </div>
+                            <span className="text-xs text-tg-hint">Soon</span>
                         </div>
                     </div>
 
@@ -231,7 +258,7 @@ function App() {
 
             {/* Version */}
             <p className="absolute bottom-4 text-xs text-tg-hint">
-                v0.3.0
+                v0.4.0
             </p>
         </div>
     )

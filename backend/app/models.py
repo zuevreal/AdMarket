@@ -138,6 +138,10 @@ class Channel(Base):
     )
     
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    price_per_post: Mapped[Decimal | None] = mapped_column(
+        Numeric(18, 9),  # TON with 9 decimal places (nanotons precision)
+        nullable=True,
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )

@@ -11,6 +11,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.users import router as users_router
+from app.api.channels import router as channels_router
 from app.bot.setup import start_polling, stop_polling
 from app.core.config import get_settings
 from app.core.database import engine
@@ -61,7 +62,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 app = FastAPI(
     title="AdMarket API",
     description="Telegram advertising marketplace with TON payments",
-    version="0.2.0",
+    version="0.3.0",
     debug=settings.DEBUG,
     lifespan=lifespan,
 )
@@ -77,6 +78,7 @@ app.add_middleware(
 
 # Include API routers
 app.include_router(users_router, prefix="/api/users")
+app.include_router(channels_router, prefix="/api/channels")
 
 
 @app.get("/health")
