@@ -40,5 +40,22 @@
     "refresh_after_adding": "Нажмите обновить после добавления канала",
     "set_price_hint": "Укажите цену для получения заказов",
     "edit_channel": "Редактировать канал",
-    "channel_updated": "Канал обновлён!"
+    "channel_updated": "Канал обновлён!",
+    "search_channels": "Поиск каналов...",
+    "buy_ad": "Купить рекламу",
+    "no_results": "Каналы не найдены",
+    "try_different_filters": "Попробуйте другие фильтры",
+    "filters": "Фильтры",
+    "category": "Категория",
+    "all_categories": "Все категории",
+    "price_range": "Диапазон цен",
+    "clear_filters": "Сбросить",
+    "per_post": "за пост",
+    "cat_crypto": "Криптовалюта",
+    "cat_business": "Бизнес",
+    "cat_tech": "Технологии",
+    "cat_news": "Новости",
+    "cat_entertainment": "Развлечения",
+    "cat_other": "Другое",
+    "buy_ad_coming_soon": "Создание сделок скоро!"
 }

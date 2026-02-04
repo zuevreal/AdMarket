@@ -1,16 +1,17 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
-import { Megaphone, Loader2, Wallet, Copy, Check, AlertCircle, Radio, ChevronRight } from 'lucide-react'
+import { Megaphone, Loader2, Wallet, Copy, Check, AlertCircle, Radio, ChevronRight, Search } from 'lucide-react'
 import { TonConnectButton, useTonWallet } from '@tonconnect/ui-react'
 import WebApp from '@twa-dev/sdk'
 import axios from 'axios'
 import MyChannels from './pages/MyChannels'
+import FindChannels from './pages/FindChannels'
 
 // API base URL - always use backend through the same tunnel or relative in production
 const API_BASE = '/api'
 
-type Page = 'home' | 'my-channels'
+type Page = 'home' | 'my-channels' | 'find-channels'
 
 function App() {
     const { t } = useTranslation()
@@ -125,6 +126,18 @@ function App() {
         return <MyChannels onBack={() => setCurrentPage('home')} />
     }
 
+    // Render Find Channels page
+    if (currentPage === 'find-channels') {
+        return (
+            <FindChannels
+                onBack={() => setCurrentPage('home')}
+                onBuyAd={(channel) => {
+                    WebApp.showAlert(`${t('buy_ad_coming_soon')}\n\n${channel.title} — ${parseFloat(String(channel.price_per_post))} TON`)
+                }}
+            />
+        )
+    }
+
     return (
         <div className="flex flex-col items-center justify-center min-h-screen p-6">
             {/* Logo and Title */}
@@ -225,16 +238,19 @@ function App() {
                         </button>
 
                         {/* Find Channels */}
-                        <div className="glass-card flex items-center gap-3 opacity-60">
+                        <button
+                            onClick={() => setCurrentPage('find-channels')}
+                            className="w-full glass-card flex items-center gap-3 hover:bg-white/10 transition-colors text-left"
+                        >
                             <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center">
-                                <span className="text-lg">📢</span>
+                                <Search className="w-5 h-5 text-blue-500" />
                             </div>
                             <div className="flex-1">
                                 <p className="font-medium text-sm">{t('find_channels')}</p>
                                 <p className="text-xs text-tg-hint">{t('find_channels_desc')}</p>
                             </div>
-                            <span className="text-xs text-tg-hint">Soon</span>
-                        </div>
+                            <ChevronRight className="w-5 h-5 text-tg-hint" />
+                        </button>
 
                         {/* Secure Payments */}
                         <div className="glass-card flex items-center gap-3 opacity-60">

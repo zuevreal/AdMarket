@@ -154,7 +154,7 @@ async def get_db_user(
 ) -> User:
     """
     Get User from database by telegram_id.
-    Creates user if not exists.
+    Creates user if not exists (auto-registration).
     """
     async with get_db() as session:
         result = await session.execute(
@@ -163,9 +163,17 @@ async def get_db_user(
         user = result.scalar_one_or_none()
         
         if not user:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="User not found. Please start the bot first.",
+            # Auto-create user
+            user = User(
+                telegram_id=tg_user.id,
+                username=tg_user.username,
+                first_name=tg_user.first_name,
+                last_name=tg_user.last_name,
+                language_code=tg_user.language_code or "en",
             )
+            session.add(user)
+            await session.flush()
+            await session.refresh(user)
+            logger.info(f"Auto-created user: {tg_user.id} ({tg_user.username})")
         
         return user

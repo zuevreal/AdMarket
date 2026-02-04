@@ -7,7 +7,8 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
-from sqlalchemy import update
+from sqlalchemy import select
+from sqlalchemy.dialects.postgresql import insert
 
 from app.api.deps import TelegramUser, get_current_user
 from app.core.database import get_db
@@ -45,7 +46,7 @@ class WalletUpdateResponse(BaseModel):
     response_model=WalletUpdateResponse,
     status_code=status.HTTP_200_OK,
     summary="Link TON wallet to user",
-    description="Update user's wallet address. Requires valid Telegram initData.",
+    description="Update user's wallet address. Creates user if not exists.",
 )
 async def update_wallet(
     body: WalletUpdateRequest,
@@ -53,26 +54,29 @@ async def update_wallet(
 ) -> WalletUpdateResponse:
     """
     Link TON wallet address to the authenticated user.
-    
-    The user is identified by telegram_id from validated initData.
+    Auto-creates user if not found (upsert pattern).
     """
     try:
         async with get_db() as session:
-            # Update user's wallet address
-            result = await session.execute(
-                update(User)
-                .where(User.telegram_id == tg_user.id)
-                .values(wallet_address=body.wallet_address)
-                .returning(User.id)
+            # Upsert: INSERT or UPDATE on conflict
+            stmt = insert(User).values(
+                telegram_id=tg_user.id,
+                username=tg_user.username,
+                first_name=tg_user.first_name,
+                last_name=tg_user.last_name,
+                language_code=tg_user.language_code or "en",
+                wallet_address=body.wallet_address,
+            ).on_conflict_do_update(
+                index_elements=["telegram_id"],
+                set_={
+                    "wallet_address": body.wallet_address,
+                    "username": tg_user.username,
+                    "first_name": tg_user.first_name,
+                    "last_name": tg_user.last_name,
+                }
             )
             
-            updated = result.scalar_one_or_none()
-            
-            if not updated:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="User not found. Please start the bot first.",
-                )
+            await session.execute(stmt)
             
             logger.info(
                 f"Wallet linked: user={tg_user.id}, wallet={body.wallet_address[:8]}..."
@@ -92,3 +96,4 @@ async def update_wallet(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to update wallet address",
         )
+

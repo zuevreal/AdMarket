@@ -22,10 +22,9 @@ import AddChannelModal from '../components/AddChannelModal'
 
 const API_BASE = '/api'
 
-// Deep link for adding bot as channel admin
-// Replace with your actual bot username
+// Deep link for adding bot as channel admin (minimal permissions)
 const BOT_USERNAME = 'chanelmarket_bot'
-const ADD_BOT_DEEP_LINK = `https://t.me/${BOT_USERNAME}?startchannel=true&admin=post_messages+edit_messages`
+const ADD_BOT_DEEP_LINK = `https://t.me/${BOT_USERNAME}?startchannel&admin=post_messages`
 
 interface Channel {
     id: number
@@ -34,6 +33,7 @@ interface Channel {
     title: string
     description: string | null
     price_per_post: number | null
+    category: string | null
     is_active: boolean
 }
 
@@ -134,10 +134,24 @@ export default function MyChannels({ onBack }: MyChannelsProps) {
         setEditingChannel(null)
     }
 
-    // Open deep link in Telegram
-    const handleSelectFromTelegram = () => {
-        // Use Telegram WebApp API to open link
-        WebApp.openTelegramLink(ADD_BOT_DEEP_LINK)
+    // Open deep link in Telegram (add bot to channel)
+    const handleSelectFromTelegram = (e: React.MouseEvent) => {
+        e.preventDefault()
+        e.stopPropagation()
+        setShowModal(false)
+
+        // Use 300ms delay to let Telegram UI stabilize
+        setTimeout(() => {
+            try {
+                if (window.Telegram?.WebApp) {
+                    // Haptic feedback helps "wake up" the native bridge
+                    window.Telegram.WebApp.HapticFeedback?.impactOccurred('light')
+                    window.Telegram.WebApp.openTelegramLink(ADD_BOT_DEEP_LINK)
+                }
+            } catch (err) {
+                console.error('Deep link error:', err)
+            }
+        }, 300)
     }
 
     return (

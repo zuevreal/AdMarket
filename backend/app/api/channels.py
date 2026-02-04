@@ -26,6 +26,10 @@ router = APIRouter(tags=["channels"])
 
 # === Request/Response Models ===
 
+# Valid channel categories
+CHANNEL_CATEGORIES = ["crypto", "business", "tech", "news", "entertainment", "other"]
+
+
 class ChannelCreateRequest(BaseModel):
     """Request body for creating a channel."""
     
@@ -48,6 +52,22 @@ class ChannelCreateRequest(BaseModel):
         description="Price per advertising post in TON",
         examples=[10.5, 100],
     )
+    category: str | None = Field(
+        None,
+        description="Channel category",
+        examples=["crypto", "tech"],
+    )
+    
+    @field_validator("category")
+    @classmethod
+    def validate_category(cls, v: str | None) -> str | None:
+        """Validate category is in allowed list."""
+        if v is None:
+            return None
+        v = v.lower().strip()
+        if v not in CHANNEL_CATEGORIES:
+            raise ValueError(f"Invalid category. Must be one of: {', '.join(CHANNEL_CATEGORIES)}")
+        return v
     
     @field_validator("url")
     @classmethod
@@ -83,10 +103,33 @@ class ChannelResponse(BaseModel):
     title: str
     description: str | None
     price_per_post: Decimal | None
+    category: str | None = None
     is_active: bool
     
     class Config:
         from_attributes = True
+
+
+class MarketChannelResponse(BaseModel):
+    """Channel data for marketplace listing."""
+    
+    id: int
+    username: str | None
+    title: str
+    description: str | None
+    price_per_post: Decimal
+    category: str | None = None
+    subscribers: int | None = None  # From verified_stats
+    
+    class Config:
+        from_attributes = True
+
+
+class MarketListResponse(BaseModel):
+    """Marketplace listing response."""
+    
+    channels: list[MarketChannelResponse]
+    total: int
 
 
 class ChannelListResponse(BaseModel):
@@ -183,10 +226,18 @@ async def create_channel(
             user = result.scalar_one_or_none()
             
             if not user:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="User not found. Please start the bot first.",
+                # Auto-create user
+                user = User(
+                    telegram_id=tg_user.id,
+                    username=tg_user.username,
+                    first_name=tg_user.first_name,
+                    last_name=tg_user.last_name,
+                    language_code=tg_user.language_code or "en",
                 )
+                session.add(user)
+                await session.flush()
+                await session.refresh(user)
+                logger.info(f"Auto-created user: {tg_user.id} ({tg_user.username})")
             
             # Check if channel already exists
             result = await session.execute(
@@ -201,6 +252,8 @@ async def create_channel(
                     existing_channel.price_per_post = body.price_per_post
                     if body.description is not None:
                         existing_channel.description = body.description
+                    if body.category is not None:
+                        existing_channel.category = body.category
                     # Also update title/username in case they changed
                     existing_channel.title = chat.title or username
                     existing_channel.username = chat.username
@@ -227,6 +280,7 @@ async def create_channel(
                 description=body.description,
                 owner_id=user.id,
                 price_per_post=body.price_per_post,
+                category=body.category,
                 is_active=True,
             )
             
@@ -272,10 +326,18 @@ async def get_my_channels(
         user = result.scalar_one_or_none()
         
         if not user:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="User not found",
+            # Auto-create user, return empty channels
+            user = User(
+                telegram_id=tg_user.id,
+                username=tg_user.username,
+                first_name=tg_user.first_name,
+                last_name=tg_user.last_name,
+                language_code=tg_user.language_code or "en",
             )
+            session.add(user)
+            await session.flush()
+            logger.info(f"Auto-created user: {tg_user.id} ({tg_user.username})")
+            return ChannelListResponse(channels=[], total=0)
         
         # Get channels
         result = await session.execute(
@@ -340,4 +402,80 @@ async def delete_channel(
         return MessageResponse(
             success=True,
             message="Channel deleted successfully",
+        )
+
+
+@router.get(
+    "/market",
+    response_model=MarketListResponse,
+    summary="Browse marketplace",
+    description="Get public list of channels available for advertising with optional filters",
+)
+async def get_market_channels(
+    query: str | None = None,
+    category: str | None = None,
+    min_price: Decimal | None = None,
+    max_price: Decimal | None = None,
+) -> MarketListResponse:
+    """
+    Get channels available for advertising.
+    
+    Public endpoint (no auth required).
+    
+    Filters:
+    - query: Search in title/description (ILIKE)
+    - category: Exact match
+    - min_price: Minimum price per post
+    - max_price: Maximum price per post
+    """
+    async with get_db() as session:
+        # Base query: active channels with price set
+        stmt = select(Channel).where(
+            Channel.is_active == True,
+            Channel.price_per_post.isnot(None),
+        )
+        
+        # Apply filters
+        if query:
+            search_pattern = f"%{query}%"
+            stmt = stmt.where(
+                (Channel.title.ilike(search_pattern)) |
+                (Channel.description.ilike(search_pattern))
+            )
+        
+        if category:
+            stmt = stmt.where(Channel.category == category.lower())
+        
+        if min_price is not None:
+            stmt = stmt.where(Channel.price_per_post >= min_price)
+        
+        if max_price is not None:
+            stmt = stmt.where(Channel.price_per_post <= max_price)
+        
+        # Order by price (cheapest first)
+        stmt = stmt.order_by(Channel.price_per_post.asc())
+        
+        result = await session.execute(stmt)
+        channels = result.scalars().all()
+        
+        # Transform to MarketChannelResponse
+        market_channels = []
+        for ch in channels:
+            subscribers = None
+            if ch.verified_stats and isinstance(ch.verified_stats, dict):
+                subscribers = ch.verified_stats.get("subscribers")
+            
+            market_channels.append(MarketChannelResponse(
+                id=ch.id,
+                username=ch.username,
+                title=ch.title,
+                description=ch.description,
+                price_per_post=ch.price_per_post,
+                category=ch.category,
+                subscribers=subscribers,
+            ))
+        
+        return MarketListResponse(
+            channels=market_channels,
+            total=len(market_channels),
         )

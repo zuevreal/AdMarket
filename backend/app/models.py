@@ -142,6 +142,11 @@ class Channel(Base):
         Numeric(18, 9),  # TON with 9 decimal places (nanotons precision)
         nullable=True,
     )
+    category: Mapped[str | None] = mapped_column(
+        String(50),  # crypto, business, tech, news, entertainment, other
+        nullable=True,
+        index=True,
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )

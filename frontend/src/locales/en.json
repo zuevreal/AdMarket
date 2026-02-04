@@ -40,5 +40,22 @@
     "refresh_after_adding": "Press refresh after adding a channel",
     "set_price_hint": "Set a price to receive orders",
     "edit_channel": "Edit Channel",
-    "channel_updated": "Channel updated!"
+    "channel_updated": "Channel updated!",
+    "search_channels": "Search channels...",
+    "buy_ad": "Buy Ad",
+    "no_results": "No channels found",
+    "try_different_filters": "Try different search or filters",
+    "filters": "Filters",
+    "category": "Category",
+    "all_categories": "All categories",
+    "price_range": "Price range",
+    "clear_filters": "Clear filters",
+    "per_post": "per post",
+    "cat_crypto": "Crypto",
+    "cat_business": "Business",
+    "cat_tech": "Tech",
+    "cat_news": "News",
+    "cat_entertainment": "Entertainment",
+    "cat_other": "Other",
+    "buy_ad_coming_soon": "Deal creation coming soon!"
 }

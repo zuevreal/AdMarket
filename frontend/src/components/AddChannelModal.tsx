@@ -5,11 +5,14 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Loader2, Link, FileText, Coins } from 'lucide-react'
+import { X, Loader2, Link, FileText, Coins, Tag } from 'lucide-react'
 import axios from 'axios'
 import WebApp from '@twa-dev/sdk'
 
 const API_BASE = '/api'
+
+// Channel categories
+const CATEGORIES = ['crypto', 'business', 'tech', 'news', 'entertainment', 'other']
 
 interface Channel {
     id: number
@@ -18,6 +21,7 @@ interface Channel {
     title: string
     description: string | null
     price_per_post: number | null
+    category: string | null
     is_active: boolean
 }
 
@@ -39,6 +43,7 @@ export default function AddChannelModal({
     const [url, setUrl] = useState('')
     const [description, setDescription] = useState('')
     const [price, setPrice] = useState('')
+    const [category, setCategory] = useState('')
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
@@ -51,12 +56,14 @@ export default function AddChannelModal({
             setUrl(initialData.username ? `@${initialData.username}` : '')
             setDescription(initialData.description || '')
             setPrice(initialData.price_per_post?.toString() || '')
+            setCategory(initialData.category || '')
             setError(null)
         } else if (isOpen && !initialData) {
             // Reset form for new channel
             setUrl('')
             setDescription('')
             setPrice('')
+            setCategory('')
             setError(null)
         }
     }, [isOpen, initialData])
@@ -87,6 +94,7 @@ export default function AddChannelModal({
                         : url.trim(),
                     description: description.trim() || null,
                     price_per_post: parseFloat(price),
+                    category: category || null,
                 },
                 {
                     headers: {
@@ -126,6 +134,7 @@ export default function AddChannelModal({
         setUrl('')
         setDescription('')
         setPrice('')
+        setCategory('')
         setError(null)
         onClose()
     }
@@ -146,7 +155,7 @@ export default function AddChannelModal({
                         exit={{ y: '100%' }}
                         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
                         onClick={e => e.stopPropagation()}
-                        className="w-full max-w-lg bg-tg-bg rounded-t-3xl p-6 pb-8"
+                        className="w-full max-w-lg bg-tg-bg rounded-t-3xl p-6 pb-8 max-h-[90vh] overflow-y-auto"
                     >
                         {/* Header */}
                         <div className="flex items-center justify-between mb-6">
@@ -190,6 +199,27 @@ export default function AddChannelModal({
                                     />
                                 </div>
                             )}
+
+                            {/* Category */}
+                            <div>
+                                <label className="flex items-center gap-2 text-sm font-medium mb-2">
+                                    <Tag className="w-4 h-4 text-tg-hint" />
+                                    {t('category')}
+                                </label>
+                                <select
+                                    value={category}
+                                    onChange={e => setCategory(e.target.value)}
+                                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-tg-link focus:outline-none transition-colors"
+                                    disabled={isSubmitting}
+                                >
+                                    <option value="">{t('all_categories')}</option>
+                                    {CATEGORIES.map(cat => (
+                                        <option key={cat} value={cat}>
+                                            {t(`cat_${cat}`)}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
 
                             {/* Description */}
                             <div>
