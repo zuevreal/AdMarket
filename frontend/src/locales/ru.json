@@ -34,5 +34,11 @@
     "subscribers": "подписчиков",
     "ton": "TON",
     "home": "Главная",
-    "back": "Назад"
+    "back": "Назад",
+    "select_from_telegram": "Выбрать канал",
+    "or_add_manually": "Или добавить вручную",
+    "refresh_after_adding": "Нажмите обновить после добавления канала",
+    "set_price_hint": "Укажите цену для получения заказов",
+    "edit_channel": "Редактировать канал",
+    "channel_updated": "Канал обновлён!"
 }

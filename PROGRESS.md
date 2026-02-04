@@ -1,6 +1,6 @@
 # AdMarket — Progress Tracker
 
-## 📍 Текущий статус: Channel Management готов ✅
+## 📍 Текущий статус: Channel Edit & Deep Link готов ✅
 
 ---
 
@@ -20,50 +20,34 @@
 ## Этап 2: Telegram Bot ✅
 - [x] `aiogram>=3.4.0` добавлен в зависимости
 - [x] `backend/app/core/database.py` — async session manager
-- [x] `backend/app/bot/setup.py` — Bot + Dispatcher
+- [x] `backend/app/bot/setup.py` — Bot + Dispatcher (без circular import)
 - [x] `backend/app/bot/handlers.py` — /start с upsert в БД
-- [x] `backend/app/locales/{en,ru}.json` — i18n
+- [x] `backend/app/locales/{en,ru}.json` — i18n (+ channel_auto_connected)
 - [x] `backend/app/main.py` — lifespan + polling интеграция
 - [x] WebApp кнопка в /start (InlineKeyboardButton + WebAppInfo)
+- [x] **Auto-Connect Deep Link** ← **NEW**
+  - `ChatMemberUpdated` handler для авто-регистрации каналов
+  - DM-уведомление при добавлении бота как админа
 
 ---
 
 ## Этап 3: Mini App (Frontend) ✅
 - [x] Инициализация Vite + React + TypeScript
-  - `frontend/package.json` с зависимостями
-  - `frontend/vite.config.ts` (alias @, proxy /api)
-  - `frontend/tsconfig.json`
 - [x] Telegram WebApp SDK интеграция
-  - `@twa-dev/sdk` в зависимостях
-  - `WebApp.ready()` + `WebApp.expand()` в App.tsx
 - [x] TailwindCSS с Telegram CSS переменными
-  - `tailwind.config.js` (tg-bg, tg-text, tg-button)
-  - `index.css` с glass-card и tg-button классами
 - [x] UI компоненты (loading state, info cards)
 - [x] Docker интеграция
-  - `frontend/Dockerfile` (node:20-alpine)
-  - Сервис `frontend` в docker-compose.yml
 - [x] CloudPub tunnel (allowedHosts в vite.config.ts)
 - [x] TON Connect интеграция
-  - `@tonconnect/ui-react` в зависимостях
-  - `TonConnectUIProvider` в main.tsx
-  - `TonConnectButton` в App.tsx
-  - Отображение адреса кошелька с копированием
-  - `public/tonconnect-manifest.json`
 - [x] **Wallet Sync с бэкендом**
-  - `useTonWallet()` hook для отслеживания подключения
-  - POST `/api/users/wallet` при подключении кошелька
-  - Статус-индикатор (syncing, success, error)
-- [x] **Frontend i18n (локализация)**
-  - `i18next`, `react-i18next`, `i18next-browser-languagedetector`
-  - `src/i18n.ts` — Custom Telegram language detector
-  - `src/locales/en.json`, `src/locales/ru.json`
-  - `useTranslation()` hook в App.tsx
-- [x] **Channel Management UI** ← **NEW**
-  - `pages/MyChannels.tsx` — список каналов с удалением
-  - `components/AddChannelModal.tsx` — форма добавления
+- [x] **Frontend i18n (локализация)** — 40+ ключей
+- [x] **Channel Management UI**
+  - `pages/MyChannels.tsx` — список каналов
+  - `components/AddChannelModal.tsx` — добавление/редактирование
   - Навигация Home ↔ My Channels в App.tsx
-  - Локализованные тексты (25+ ключей)
+  - Deep link кнопка "Выбрать канал" (`WebApp.openTelegramLink()`)
+  - Редактирование цены канала через ту же модалку ← **NEW**
+  - Форматирование цены (убраны лишние нули) ← **NEW**
 
 ---
 
@@ -71,8 +55,8 @@
 - [x] `backend/app/api/__init__.py` — пакет API
 - [x] `backend/app/api/deps.py` — Telegram initData HMAC-SHA256 валидация
 - [x] `backend/app/api/users.py` — POST /wallet эндпоинт
-- [x] **`backend/app/api/channels.py`** ← **NEW**
-  - POST `/api/channels/` — добавить канал (с проверкой админа)
+- [x] **`backend/app/api/channels.py`**
+  - POST `/api/channels/` — **Upsert** (создать или обновить) ← **NEW**
   - GET `/api/channels/my` — мои каналы
   - DELETE `/api/channels/{id}` — удалить канал
 - [x] CORS middleware в main.py
@@ -96,4 +80,5 @@
 6. `feat: add TON Connect wallet integration`
 7. `feat: add wallet sync API with initData validation`
 8. `feat: add frontend i18n with Telegram language detection`
-9. `feat: add channel management with bot admin verification` ← **NEW**
+9. `feat: add channel management with bot admin verification`
+10. `feat: add auto-connect deep link and channel editing` ← **NEXT**

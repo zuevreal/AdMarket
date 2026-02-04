@@ -1,3 +1,4 @@
 {
-    "start_message": "👋 Welcome to <b>AdMarket</b>!\n\nPress the button below to open the app."
+    "start_message": "👋 Welcome to <b>AdMarket</b>!\n\nPress the button below to open the app.",
+    "channel_auto_connected": "✅ Channel <b>{title}</b> connected!\n\nReturn to the app to set the price and start earning."
 }

@@ -1,5 +1,6 @@
 """
 Telegram bot initialization and setup.
+Contains only bot and dispatcher creation - no router imports to avoid circular dependencies.
 """
 
 import asyncio
@@ -9,7 +10,6 @@ from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 
-from app.bot.handlers import router
 from app.core.config import get_settings
 
 logger = logging.getLogger(__name__)
@@ -21,15 +21,15 @@ bot = Bot(
     default=DefaultBotProperties(parse_mode=ParseMode.HTML),
 )
 
-# Initialize dispatcher with router
+# Initialize dispatcher (router will be added in main.py to avoid circular import)
 dp = Dispatcher()
-dp.include_router(router)
 
 
 async def start_polling() -> None:
     """
     Start bot polling.
     Should be called as asyncio task from FastAPI lifespan.
+    Note: Router must be added to dp before calling this.
     """
     logger.info("Starting Telegram bot polling...")
     

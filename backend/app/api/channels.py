@@ -134,21 +134,26 @@ async def verify_bot_is_admin(bot: Bot, chat_id: int) -> bool:
 @router.post(
     "/",
     response_model=ChannelResponse,
-    status_code=status.HTTP_201_CREATED,
-    summary="Add a new channel",
-    description="Add a Telegram channel to the marketplace. Bot must be admin.",
+    responses={
+        200: {"description": "Channel updated successfully"},
+        201: {"description": "Channel created successfully"},
+    },
+    summary="Add or update a channel",
+    description="Add a Telegram channel to the marketplace or update if owned by user. Bot must be admin.",
 )
 async def create_channel(
     body: ChannelCreateRequest,
     tg_user: Annotated[TelegramUser, Depends(get_current_user)],
 ) -> ChannelResponse:
     """
-    Add a new channel to the marketplace.
+    Add or update a channel in the marketplace.
     
     1. Validates the channel URL/username
     2. Fetches channel info from Telegram API
     3. Verifies bot is admin of the channel
-    4. Saves channel to database
+    4. If channel exists and owned by user: UPDATE price/description
+    5. If channel exists but owned by another: 409 Conflict
+    6. If channel doesn't exist: CREATE new
     """
     username = body.url  # Already validated and normalized by Pydantic
     
@@ -184,16 +189,37 @@ async def create_channel(
                 )
             
             # Check if channel already exists
-            existing = await session.execute(
+            result = await session.execute(
                 select(Channel).where(Channel.telegram_id == chat.id)
             )
-            if existing.scalar_one_or_none():
-                raise HTTPException(
-                    status_code=status.HTTP_409_CONFLICT,
-                    detail="This channel is already registered",
-                )
+            existing_channel = result.scalar_one_or_none()
             
-            # Create channel
+            if existing_channel:
+                # Channel exists - check ownership
+                if existing_channel.owner_id == user.id:
+                    # EDIT MODE: Update existing channel (owned by current user)
+                    existing_channel.price_per_post = body.price_per_post
+                    if body.description is not None:
+                        existing_channel.description = body.description
+                    # Also update title/username in case they changed
+                    existing_channel.title = chat.title or username
+                    existing_channel.username = chat.username
+                    existing_channel.is_active = True
+                    
+                    await session.flush()
+                    await session.refresh(existing_channel)
+                    
+                    logger.info(f"Channel updated: {existing_channel.id} ({existing_channel.title}) by user {tg_user.id}")
+                    
+                    return ChannelResponse.model_validate(existing_channel)
+                else:
+                    # Channel owned by another user
+                    raise HTTPException(
+                        status_code=status.HTTP_409_CONFLICT,
+                        detail="This channel is already registered by another user",
+                    )
+            
+            # CREATE MODE: New channel
             channel = Channel(
                 telegram_id=chat.id,
                 username=chat.username,

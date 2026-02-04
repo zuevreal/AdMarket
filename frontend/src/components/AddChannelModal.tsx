@@ -1,8 +1,8 @@
 /**
- * Add Channel Modal - form for adding a new channel.
+ * Add/Edit Channel Modal - form for adding or editing a channel.
  */
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Loader2, Link, FileText, Coins } from 'lucide-react'
@@ -25,9 +25,16 @@ interface AddChannelModalProps {
     isOpen: boolean
     onClose: () => void
     onSuccess: (channel: Channel) => void
+    /** If provided, modal is in edit mode with pre-filled data */
+    initialData?: Channel | null
 }
 
-export default function AddChannelModal({ isOpen, onClose, onSuccess }: AddChannelModalProps) {
+export default function AddChannelModal({
+    isOpen,
+    onClose,
+    onSuccess,
+    initialData
+}: AddChannelModalProps) {
     const { t } = useTranslation()
     const [url, setUrl] = useState('')
     const [description, setDescription] = useState('')
@@ -35,11 +42,30 @@ export default function AddChannelModal({ isOpen, onClose, onSuccess }: AddChann
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
+    // Determine if we're in edit mode
+    const isEditMode = !!initialData
+
+    // Populate form when editing
+    useEffect(() => {
+        if (isOpen && initialData) {
+            setUrl(initialData.username ? `@${initialData.username}` : '')
+            setDescription(initialData.description || '')
+            setPrice(initialData.price_per_post?.toString() || '')
+            setError(null)
+        } else if (isOpen && !initialData) {
+            // Reset form for new channel
+            setUrl('')
+            setDescription('')
+            setPrice('')
+            setError(null)
+        }
+    }, [isOpen, initialData])
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setError(null)
 
-        if (!url.trim()) {
+        if (!isEditMode && !url.trim()) {
             setError(t('error_invalid_url'))
             return
         }
@@ -55,7 +81,10 @@ export default function AddChannelModal({ isOpen, onClose, onSuccess }: AddChann
             const response = await axios.post(
                 `${API_BASE}/channels/`,
                 {
-                    url: url.trim(),
+                    // Use existing username if editing, otherwise new URL
+                    url: isEditMode
+                        ? (initialData?.username ? `@${initialData.username}` : `${initialData?.telegram_id}`)
+                        : url.trim(),
                     description: description.trim() || null,
                     price_per_post: parseFloat(price),
                 },
@@ -67,15 +96,10 @@ export default function AddChannelModal({ isOpen, onClose, onSuccess }: AddChann
                 }
             )
 
-            // Reset form
-            setUrl('')
-            setDescription('')
-            setPrice('')
-
             onSuccess(response.data)
 
         } catch (error: unknown) {
-            console.error('Failed to add channel:', error)
+            console.error('Failed to save channel:', error)
 
             if (axios.isAxiosError(error) && error.response?.data?.detail) {
                 const detail = error.response.data.detail
@@ -91,7 +115,7 @@ export default function AddChannelModal({ isOpen, onClose, onSuccess }: AddChann
                     setError(detail)
                 }
             } else {
-                setError('Failed to add channel')
+                setError('Failed to save channel')
             }
         } finally {
             setIsSubmitting(false)
@@ -126,7 +150,9 @@ export default function AddChannelModal({ isOpen, onClose, onSuccess }: AddChann
                     >
                         {/* Header */}
                         <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-xl font-bold">{t('add_channel')}</h2>
+                            <h2 className="text-xl font-bold">
+                                {isEditMode ? t('edit_channel') : t('add_channel')}
+                            </h2>
                             <button
                                 onClick={handleClose}
                                 className="p-2 rounded-full hover:bg-white/10 transition-colors"
@@ -135,23 +161,35 @@ export default function AddChannelModal({ isOpen, onClose, onSuccess }: AddChann
                             </button>
                         </div>
 
+                        {/* Channel Title (edit mode only) */}
+                        {isEditMode && initialData && (
+                            <div className="mb-4 p-3 rounded-xl bg-white/5 border border-white/10">
+                                <p className="font-medium">{initialData.title}</p>
+                                {initialData.username && (
+                                    <p className="text-sm text-tg-link">@{initialData.username}</p>
+                                )}
+                            </div>
+                        )}
+
                         {/* Form */}
                         <form onSubmit={handleSubmit} className="space-y-4">
-                            {/* Channel Link */}
-                            <div>
-                                <label className="flex items-center gap-2 text-sm font-medium mb-2">
-                                    <Link className="w-4 h-4 text-tg-hint" />
-                                    {t('channel_link')}
-                                </label>
-                                <input
-                                    type="text"
-                                    value={url}
-                                    onChange={e => setUrl(e.target.value)}
-                                    placeholder={t('channel_link_placeholder')}
-                                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-tg-link focus:outline-none transition-colors"
-                                    disabled={isSubmitting}
-                                />
-                            </div>
+                            {/* Channel Link (only for new channels) */}
+                            {!isEditMode && (
+                                <div>
+                                    <label className="flex items-center gap-2 text-sm font-medium mb-2">
+                                        <Link className="w-4 h-4 text-tg-hint" />
+                                        {t('channel_link')}
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={url}
+                                        onChange={e => setUrl(e.target.value)}
+                                        placeholder={t('channel_link_placeholder')}
+                                        className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-tg-link focus:outline-none transition-colors"
+                                        disabled={isSubmitting}
+                                    />
+                                </div>
+                            )}
 
                             {/* Description */}
                             <div>
@@ -210,7 +248,7 @@ export default function AddChannelModal({ isOpen, onClose, onSuccess }: AddChann
                                 </button>
                                 <button
                                     type="submit"
-                                    disabled={isSubmitting || !url.trim() || !price}
+                                    disabled={isSubmitting || (!isEditMode && !url.trim()) || !price}
                                     className="flex-1 py-3 rounded-xl bg-tg-button text-tg-button-text font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                                 >
                                     {isSubmitting ? (

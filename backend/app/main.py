@@ -12,7 +12,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.users import router as users_router
 from app.api.channels import router as channels_router
-from app.bot.setup import start_polling, stop_polling
+from app.bot.setup import bot, dp, start_polling, stop_polling
+from app.bot.handlers import router as bot_router  # Import after setup to avoid circular
 from app.core.config import get_settings
 from app.core.database import engine
 # Import all models BEFORE create_all so SQLAlchemy sees them
@@ -42,6 +43,10 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         await conn.run_sync(Base.metadata.create_all)
     logger.info("Database tables created successfully")
     
+    # Register bot router BEFORE starting polling (breaks circular import)
+    dp.include_router(bot_router)
+    logger.info("Bot router registered")
+    
     # Start bot polling as background task
     polling_task = asyncio.create_task(start_polling())
     
@@ -62,7 +67,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 app = FastAPI(
     title="AdMarket API",
     description="Telegram advertising marketplace with TON payments",
-    version="0.3.0",
+    version="0.4.0",
     debug=settings.DEBUG,
     lifespan=lifespan,
 )

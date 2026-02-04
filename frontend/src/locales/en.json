@@ -34,5 +34,11 @@
     "subscribers": "subscribers",
     "ton": "TON",
     "home": "Home",
-    "back": "Back"
+    "back": "Back",
+    "select_from_telegram": "Select from Telegram",
+    "or_add_manually": "Or add manually",
+    "refresh_after_adding": "Press refresh after adding a channel",
+    "set_price_hint": "Set a price to receive orders",
+    "edit_channel": "Edit Channel",
+    "channel_updated": "Channel updated!"
 }
